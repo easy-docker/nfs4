@@ -1,6 +1,6 @@
-FROM alpine:3.6
+FROM alpine
 
-COPY ./bin/start-nfs /start-nfs
+COPY ./start-nfs /start-nfs
 
 RUN set -xe \
   && apk add --no-cache --no-progress nfs-utils \

@@ -1,68 +1,53 @@
-# nfs4-alpine
+# nfs4-server
 Docker image with NFS v4, based on Alpine.
 
-## Environment Variables
+## 快速启动
 
-You could provide the following 3 environment variables to configure the nfs exports:
+```
+docker run --privileged -d --name=nfs \
+    -p 2049:2049/tcp -p 2049:2049/udp \
+    -v /tmp:/nfs-share \
+    ghostry/nfs4
+```
+
+## 可用配置
+
+方式1,使用变量设置共享文件:
 
 - NFS_EXPORT_DIR
 - NFS_EXPORT_DOMAIN
 - NFS_EXPORT_OPTIONS
 
-When container start, the environment variables are parsed and put in `/etc/exports` file:
+启动时会使用变量初始化文件 `/etc/exports` :
 
 `NFS_EXPORT_DIR NFS_EXPORT_DOMAIN(NFS_EXPORT_OPTIONS)`
 
-Default value is:
+默认值为:
 
 `/nfs-share *(rw,fsid=0,sync,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt,no_acl)`
 
-> **This default configure is no security implemented, so use it only in a secure environment.**
+> **这不是安全的选项,请只在安全环境内使用**
 
-## Run it
-
-Add the SYS_ADMIN capability or run in privileged mode.
-Capabilities SETGID and SETUID is maybe also needed, the rest can be droped.
-
-Depending on which operating system Docker is run on, installed security modules (e.g. selinux,
-appArmor) might prevent NFS from starting. To overcome this you can run the container in privileged
-mode or add extra parameters to the run command. On Ubuntu add --security-opt apparmor:unconfined. 
-
-This is needed in order to allow `exportfs` and `nfsd` to run in container.
-
-An example using privileged mode:
+方式2,使用exports文件,
 
 ```
 docker run --privileged -d --name=nfs \
-  -p 111:111/tcp -p 111:111/udp \
-  -p 2049:2049/tcp -p 2049:2049/udp \
-  -v /tmp:/nfs-share flin/nfs4-alpine
+    -p 2049:2049/tcp -p 2049:2049/udp \
+    -v /path/exports:/etc/exports:ro \
+    -v /tmp:/nfs-share \
+    ghostry/nfs4
 ```
 
-Or simple use host network,
+## 客户端挂载
 
-```
-docker run --privileged -d --name=nfs \
-  --network=host \
-  -v /tmp:/nfs-share flin/nfs4-alpine
-```
-
-## Mount it
-
-First check you have `mount.nfs` installed.
-
-```
-ls /sbin/mount.nfs
-```
-
-If this file doesn't exist, consider to install `nfs-common` package:
+安装客户端
 
 ```
 sudo apt-get install nfs-common
 ```
 
-And change below `127.0.0.1` and `/mnt/nfs` to the nfs-server IP and mount destination.
+挂载
 
 ```
-sudo mount -v -t nfs -o vers=4,port=2049 127.0.0.1:/ /mnt/nfs
+sudo mount -v -t nfs4 127.0.0.1:/ /mnt/nfs
 ```
