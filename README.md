@@ -6,7 +6,7 @@ Docker image with NFS v4, based on Alpine.
 ```
 docker run --privileged -d --name=nfs \
     -p 2049:2049/tcp -p 2049:2049/udp \
-    -v /tmp:/nfs-share \
+    -v /tmp:/exports \
     ghostry/nfs4
 ```
 
@@ -34,7 +34,7 @@ docker run --privileged -d --name=nfs \
 docker run --privileged -d --name=nfs \
     -p 2049:2049/tcp -p 2049:2049/udp \
     -v /path/exports:/etc/exports:ro \
-    -v /tmp:/nfs-share \
+    -v /tmp:/exports \
     ghostry/nfs4
 ```
 
@@ -52,6 +52,7 @@ sudo apt-get install nfs-common
 sudo mount -v -t nfs4 127.0.0.1:/ /mnt/nfs
 ```
 ## 参数说明
+
 【1】挂载授权 IP 说明：
 
 |配置 |说明|
